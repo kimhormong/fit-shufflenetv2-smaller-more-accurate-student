@@ -39,18 +39,10 @@ class FitNetWrapper(nn.Module):
     
     
         # 2. Fix Spatial Mismatch (Height/Width)
-        # If the teacher hint is 14x14 and student is 28x28, this resizes student to 14x14
-        if regressed_student.shape[2:] != self.hint_output.shape[2:]:
-            
-            # Resize the regressed student features to match the hint output size by bilinear interpolation which do things as follows:
-            # 1. For each pixel in the output feature map, it identifies the corresponding region in the input feature map.
-            # 2. It then computes the output pixel value by taking a weighted average of the four nearest pixels in the input feature map, where the weights are determined by the distance from the output pixel to the input pixels.
-            # 
-            regressed_student = F.interpolate(
-            regressed_student, 
-            size=self.hint_output.shape[2:], 
-            mode='bilinear', 
-            align_corners=False
-        )
+        # Teacher Spatial Size: 14x14x256
+        # Student Spatial Size: 14x14x80
+        # Width and height from both teacher and student are 14x14, so we can directly compare them without resizing.
+        # TODO: If there was a mismatch, section 2.2 HINT-BASED TRAINING of the paper (FITNETS: HINT-BASED TRAINING FOR DEEP NETWORKS) provides guidance on how to handle it
+
         
         return s_logits, t_logits, regressed_student, self.hint_output
